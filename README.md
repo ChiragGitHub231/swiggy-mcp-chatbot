@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Swiggy MCP Chatbot
+
+An AI-powered conversational food assistant for Swiggy built with Next.js, Model Context Protocol (MCP), and secure OAuth 2.0 with PKCE.
+
+## Project Structure
+
+```text
+swiggy-mcp-chatbot/
+├── src/
+│   ├── app/
+│   │   ├── page.tsx                  # Home landing page with login action
+│   │   ├── auth/
+│   │   │   └── callback/
+│   │   │       └── page.tsx          # Optional callback status UI
+│   │   ├── chat/
+│   │   │   └── page.tsx              # Protected chatbot page
+│   │   ├── api/
+│   │   │   ├── auth/
+│   │   │   │   ├── login/
+│   │   │   │   │   └── route.ts      # Start OAuth + PKCE
+│   │   │   │   ├── callback/
+│   │   │   │   │   └── route.ts      # Exchange code + set cookie
+│   │   │   │   └── logout/
+│   │   │   │       └── route.ts      # Clear cookie + revoke if supported
+│   │   │   └── chat/
+│   │   │       └── route.ts          # Validate cookie + process queries
+│   │   ├── layout.tsx
+│   │   └── globals.css
+│   │
+│   ├── components/
+│   │   ├── LoginButton.tsx           # Connect Swiggy button
+│   │   ├── ChatWindow.tsx            # Main chat interface & suggestions
+│   │   ├── ChatMessage.tsx           # User & AI message bubbles
+│   │   ├── ChatInput.tsx             # Chat query input field
+│   │   └── OrderStatusCard.tsx       # Live delivery tracking card
+│   │
+│   └── lib/
+│       ├── oauth.ts                  # Authorization URL + PKCE
+│       ├── auth.ts                   # Cookie creation + validation
+│       ├── token-manager.ts          # Swiggy token storage + refresh
+│       ├── swiggy-mcp.ts             # MCP client + tool calls
+│       └── ai-agent.ts               # LLM + tool orchestration
+│
+├── .env.example
+├── package.json
+└── tsconfig.json
+```
+
+## Environment Variables
+
+Copy `.env.example` to `.env.local`:
+
+```bash
+cp .env.example .env.local
+```
+
+Configure your Swiggy developer credentials:
+
+```env
+SWIGGY_CLIENT_ID=your_client_id
+SWIGGY_CLIENT_SECRET=your_client_secret_if_required
+SWIGGY_REDIRECT_URI=http://localhost:3000/api/auth/callback
+```
 
 ## Getting Started
 
-First, run the development server:
+Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Open [http://localhost:3000](http://localhost:3000) to view the application.
