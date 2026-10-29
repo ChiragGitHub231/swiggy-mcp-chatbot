@@ -1,5 +1,5 @@
-import Link from "next/link";
-import { LoginButton } from "@/components/LoginButton";
+import { Suspense } from "react";
+import { CallbackClientHandler } from "./CallbackClientHandler";
 
 interface CallbackPageProps {
   searchParams: Promise<{
@@ -8,59 +8,31 @@ interface CallbackPageProps {
   }>;
 }
 
-export default async function AuthCallbackPage({ searchParams }: CallbackPageProps) {
+async function CallbackContent({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string; status?: string }>;
+}) {
   const params = await searchParams;
-  const error = params.error;
-  const status = params.status;
+  return <CallbackClientHandler error={params.error} status={params.status} />;
+}
 
-  if (error) {
-    return (
-      <main className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-        <div className="w-full max-w-md p-8 rounded-2xl border border-red-200 dark:border-red-900/50 bg-red-50/50 dark:bg-red-950/20 shadow-md">
-          <div className="text-4xl mb-3">⚠️</div>
-          <h2 className="text-xl font-bold text-red-700 dark:text-red-400">
-            Authentication Failed
-          </h2>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-2 mb-6">
-            {decodeURIComponent(error)}
-          </p>
-          <div className="flex flex-col gap-3">
-            <LoginButton label="Try Connecting Again" />
-            <Link
-              href="/"
-              className="text-xs text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300 underline"
-            >
-              Return to Homepage
-            </Link>
-          </div>
-        </div>
-      </main>
-    );
-  }
-
+function CallbackFallback() {
   return (
-    <main className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-      <div className="w-full max-w-md p-8 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-lg">
-        <div className="w-12 h-12 bg-orange-100 dark:bg-orange-950/40 text-orange-600 rounded-full mx-auto flex items-center justify-center text-2xl mb-4">
-          🛵
-        </div>
-        <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
-          {status === "success"
-            ? "Connected Successfully!"
-            : "Completing Swiggy Login..."}
-        </h2>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-2 mb-6">
-          Setting up your secure session with Swiggy MCP.
-        </p>
-
-        <Link
-          href="/chat"
-          className="inline-flex items-center justify-center w-full px-6 py-3 rounded-xl font-semibold text-white bg-orange-600 hover:bg-orange-700 transition-colors shadow-sm"
-        >
-          Proceed to Chat
-        </Link>
-      </div>
-    </main>
+    <div className="w-full max-w-md p-8 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-lg animate-pulse">
+      <div className="w-12 h-12 bg-orange-100 dark:bg-orange-950/40 rounded-full mx-auto mb-4" />
+      <div className="h-6 bg-zinc-200 dark:bg-zinc-800 rounded w-3/4 mx-auto mb-2" />
+      <div className="h-4 bg-zinc-100 dark:bg-zinc-800/60 rounded w-1/2 mx-auto" />
+    </div>
   );
 }
 
+export default function AuthCallbackPage({ searchParams }: CallbackPageProps) {
+  return (
+    <main className="flex-1 flex flex-col items-center justify-center p-6 text-center">
+      <Suspense fallback={<CallbackFallback />}>
+        <CallbackContent searchParams={searchParams} />
+      </Suspense>
+    </main>
+  );
+}

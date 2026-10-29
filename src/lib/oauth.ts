@@ -15,9 +15,9 @@ export function getOAuthConfig(): OAuthConfig {
     redirectUri:
       process.env.SWIGGY_REDIRECT_URI || "http://localhost:3000/api/auth/callback",
     authUrl:
-      process.env.SWIGGY_AUTH_URL || "https://accounts.swiggy.com/oauth/authorize",
+      process.env.SWIGGY_AUTH_URL || "https://mcp.swiggy.com/auth/authorize",
     tokenUrl:
-      process.env.SWIGGY_TOKEN_URL || "https://accounts.swiggy.com/oauth/token",
+      process.env.SWIGGY_TOKEN_URL || "https://mcp.swiggy.com/auth/token",
   };
 }
 
@@ -54,7 +54,8 @@ export function generateState(): string {
 export function buildAuthorizationUrl(
   state: string,
   codeChallenge: string,
-  scope: string = "read:orders write:orders read:profile"
+  scope: string = "openid profile phone read:orders write:orders read:profile",
+  loginHint?: string
 ): string {
   const config = getOAuthConfig();
   const url = new URL(config.authUrl);
@@ -67,6 +68,10 @@ export function buildAuthorizationUrl(
   url.searchParams.set("code_challenge", codeChallenge);
   url.searchParams.set("code_challenge_method", "S256");
 
+  if (loginHint) {
+    url.searchParams.set("login_hint", loginHint);
+  }
+
   return url.toString();
 }
 
@@ -76,6 +81,14 @@ export interface TokenExchangeResponse {
   expires_in: number;
   refresh_token?: string;
   scope?: string;
+  id_token?: string;
+  user?: Record<string, unknown>;
+  profile?: Record<string, unknown>;
+  phone?: string;
+  phone_number?: string;
+  mobile?: string;
+  sub?: string;
+  [key: string]: unknown;
 }
 
 /**

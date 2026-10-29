@@ -27,46 +27,47 @@ export function ChatInput({ onSendMessage, disabled = false }: ChatInputProps) {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex items-center gap-2 p-3 bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800"
-    >
-      <input
-        type="text"
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={handleKeyDown}
-        disabled={disabled}
-        placeholder={
-          disabled
-            ? "Waiting for Swiggy assistant..."
-            : "Ask anything (e.g. 'Track my order', 'Find biryani')..."
-        }
-        className="flex-1 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all text-sm disabled:opacity-60"
-      />
-      <button
-        type="submit"
-        disabled={disabled || !input.trim()}
-        className="px-5 py-3 rounded-xl bg-orange-600 hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium text-sm flex items-center gap-1.5 transition-colors shadow-sm"
+    <div className="w-full bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 p-4 shrink-0 shadow-sm">
+      <form
+        onSubmit={handleSubmit}
+        className="max-w-5xl mx-auto flex items-center gap-3"
       >
-        <span>Send</span>
-        <svg
-          className="w-4 h-4 transform rotate-90"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          viewBox="0 0 24 24"
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          disabled={disabled}
+          placeholder={
+            disabled
+              ? "Waiting for Swiggy assistant..."
+              : "Ask anything (e.g. 'Track my order', 'Find biryani near me')..."
+          }
+          className="flex-1 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 px-5 py-3.5 rounded-2xl border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all text-sm disabled:opacity-60 shadow-inner"
+        />
+        <button
+          type="submit"
+          disabled={disabled || !input.trim()}
+          className="px-6 py-3.5 rounded-2xl bg-orange-600 hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-sm flex items-center gap-2 transition-all shadow-md hover:shadow-lg cursor-pointer shrink-0"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 19V5m0 0l-7 7m7-7l7 7"
-          />
-        </svg>
-      </button>
-    </form>
+          <span>Send</span>
+          <svg
+            className="w-4 h-4 transform rotate-90"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 19V5m0 0l-7 7m7-7l7 7"
+            />
+          </svg>
+        </button>
+      </form>
+    </div>
   );
 }
 
 export default ChatInput;
-

@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { consumeOAuthTempCookies, setSession, UserSession } from "@/lib/auth";
+import {
+  consumeOAuthTempCookies,
+  setSession,
+  UserSession,
+  resolveUserFromTokens,
+  cleanPhoneNumber,
+} from "@/lib/auth";
 import { exchangeCodeForTokens } from "@/lib/oauth";
 
 export async function GET(request: NextRequest) {
@@ -24,8 +30,9 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Consume and validate state and PKCE verifier
-    const { state: savedState, verifier } = await consumeOAuthTempCookies();
+    // Consume and validate state, PKCE verifier, and optional phone
+    const { state: savedState, verifier, phone: savedPhone } =
+      await consumeOAuthTempCookies();
 
     // Verify state to protect against CSRF attacks
     if (savedState && state && savedState !== state) {
@@ -39,23 +46,29 @@ export async function GET(request: NextRequest) {
     // Exchange authorization code for access and refresh tokens
     const tokens = await exchangeCodeForTokens(code, codeVerifier);
 
+    // Automatically resolve user profile & mobile number used during OTP login
+    const userProfile = await resolveUserFromTokens(tokens as Record<string, unknown>);
+
+    const finalPhone = cleanPhoneNumber(savedPhone) || userProfile?.phone;
+
     const session: UserSession = {
       accessToken: tokens.access_token,
       refreshToken: tokens.refresh_token,
       expiresAt: Date.now() + (tokens.expires_in || 3600) * 1000,
       tokenType: tokens.token_type || "Bearer",
       user: {
-        name: "Swiggy User",
-        phone: "+91 98765 43210",
+        name: userProfile?.name || "Swiggy User",
+        phone: finalPhone,
       },
     };
 
     // Store in secure HTTP-only cookie
     await setSession(session);
 
-    // Redirect to protected chat page
-    const chatUrl = new URL("/chat", request.url);
-    return NextResponse.redirect(chatUrl.toString());
+    // Redirect to callback status UI which handles popup closing & parent window notification
+    const callbackUrl = new URL("/auth/callback", request.url);
+    callbackUrl.searchParams.set("status", "success");
+    return NextResponse.redirect(callbackUrl.toString());
   } catch (err) {
     console.error("Token exchange failed:", err);
     const errorRedirect = new URL("/auth/callback", request.url);
@@ -66,4 +79,3 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(errorRedirect.toString());
   }
 }
-
