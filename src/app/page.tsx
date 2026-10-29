@@ -1,10 +1,21 @@
-import Link from "next/link";
-import { getSession } from "@/lib/auth";
+import { connection } from "next/server";
+import { redirect } from "next/navigation";
+import { getValidAccessToken } from "@/lib/token-manager";
 import { LoginButton } from "@/components/LoginButton";
 
+// Marks this route dynamic to allow server-side auth checking and instant redirect
+export const instant = false;
+
 export default async function HomePage() {
-  const session = await getSession();
-  const isLoggedIn = !!session?.accessToken;
+  // Signal request-time execution to Next.js before dynamic timestamp/cookie checks
+  await connection();
+
+  // If user has an active, valid (or refreshable) session, redirect directly to /chat
+  const validToken = await getValidAccessToken();
+
+  if (validToken) {
+    redirect("/chat");
+  }
 
   return (
     <main className="flex-1 flex flex-col items-center justify-center p-6 md:p-12 max-w-4xl mx-auto w-full">
@@ -29,25 +40,7 @@ export default async function HomePage() {
 
       {/* Action CTA */}
       <div className="mt-8 flex flex-col sm:flex-row items-center gap-4">
-        {isLoggedIn ? (
-          <>
-            <Link
-              href="/chat"
-              className="px-8 py-3.5 rounded-xl font-bold text-white bg-orange-600 hover:bg-orange-700 transition-all shadow-md hover:shadow-lg flex items-center gap-2"
-            >
-              <span>Open Swiggy Chat</span>
-              <span className="text-lg">→</span>
-            </Link>
-            <a
-              href="/api/auth/logout"
-              className="text-sm text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300 underline"
-            >
-              Sign out
-            </a>
-          </>
-        ) : (
-          <LoginButton label="Connect Swiggy with OAuth + PKCE" />
-        )}
+        <LoginButton label="Connect Swiggy with OAuth + PKCE" />
       </div>
 
       {/* Feature Highlights Grid */}
@@ -85,4 +78,3 @@ export default async function HomePage() {
     </main>
   );
 }
-

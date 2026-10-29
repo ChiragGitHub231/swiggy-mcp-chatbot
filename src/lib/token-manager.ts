@@ -1,4 +1,4 @@
-import { getSession, setSession, UserSession } from "./auth";
+import { getSession, setSession, clearSession, UserSession } from "./auth";
 import { getOAuthConfig } from "./oauth";
 
 const EXPIRATION_BUFFER_MS = 60 * 1000; // 1 minute safety buffer
@@ -67,7 +67,9 @@ export async function refreshSwiggyToken(
 }
 
 /**
- * Obtains a valid access token for the current session, automatically refreshing if needed
+ * Obtains a valid access token for the current session.
+ * - If the access token is expired, automatically generates a new one using the refresh token.
+ * - If the refresh token is expired, invalid, or fails, automatically logs the user out by clearing the session cookie.
  */
 export async function getValidAccessToken(): Promise<string | null> {
   const session = await getSession();
@@ -81,7 +83,7 @@ export async function getValidAccessToken(): Promise<string | null> {
     return session.accessToken;
   }
 
-  // If we have a refresh token, try refreshing
+  // If access token is expired and we have a refresh token, try refreshing
   if (session.refreshToken) {
     try {
       const refreshed = await refreshSwiggyToken(session.refreshToken);
@@ -95,11 +97,14 @@ export async function getValidAccessToken(): Promise<string | null> {
       await setSession(updatedSession);
       return refreshed.accessToken;
     } catch (err) {
-      console.error("Failed to auto-refresh Swiggy token:", err);
+      console.warn("Refresh token expired or invalid. Logging user out:", err);
+      // Refresh token is expired or revoked -> clear cookie to logout
+      await clearSession();
       return null;
     }
   }
 
+  // Access token expired and no refresh token available -> clear cookie to logout
+  await clearSession();
   return null;
 }
-

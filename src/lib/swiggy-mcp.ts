@@ -147,19 +147,20 @@ export async function executeSwiggyTool(
   parameters: Record<string, unknown>,
   accessToken: string
 ): Promise<{ success: boolean; result: unknown; orderData?: SwiggyOrder }> {
-  const mcpServerUrl = process.env.SWIGGY_MCP_SERVER_URL;
+  const mcpServerUrl = process.env.SWIGGY_MCP_SERVER_URL || "https://mcp.swiggy.com/food";
 
-  if (mcpServerUrl) {
+  if (mcpServerUrl && accessToken) {
     try {
-      const response = await fetch(`${mcpServerUrl}/rpc`, {
+      const response = await fetch(mcpServerUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Accept: "application/json, text/event-stream",
           Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
           jsonrpc: "2.0",
-          method: `tools/call`,
+          method: "tools/call",
           params: {
             name: toolName,
             arguments: parameters,
