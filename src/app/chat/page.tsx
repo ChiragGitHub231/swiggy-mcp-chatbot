@@ -43,7 +43,7 @@ export default async function ChatPage() {
   }
 
   return (
-    <main className="h-screen w-full flex flex-col overflow-hidden bg-zinc-50 dark:bg-zinc-950">
+    <main className="h-dvh w-full flex flex-col overflow-hidden bg-zinc-50 dark:bg-zinc-950">
       <ChatWindow
         userName={userName || "Swiggy User"}
         userPhone={userPhone}
